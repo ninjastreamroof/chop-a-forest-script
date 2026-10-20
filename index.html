@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chop A Forest Script — Auto-Farm Trees, Instant Log Collection</title>
+<meta name="description" content="Chop A Forest Script — auto-farm trees, instant log collection, teleport-to-wood, auto-sell lumber with configurable speed. Free Windows 10/11 download.">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg-0:#070b18;
+    --bg-1:#0b1226;
+    --bg-2:#101a3a;
+    --indigo:#5b6cff;
+    --indigo-2:#8a5bff;
+    --cyan:#42e0ff;
+    --text:#e8ecff;
+    --muted:#98a3c8;
+    --card:#0e1630;
+    --border:rgba(120,140,255,.16);
+    --radius:16px;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1100px 600px at 85% -10%, rgba(91,108,255,.22), transparent 60%),
+      radial-gradient(900px 500px at 0% 20%, rgba(138,91,255,.16), transparent 60%),
+      radial-gradient(1200px 700px at 50% 110%, rgba(66,224,255,.10), transparent 60%),
+      linear-gradient(160deg,var(--bg-0) 0%,var(--bg-1) 45%,var(--bg-2) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:100;
+    backdrop-filter:blur(16px) saturate(160%);
+    -webkit-backdrop-filter:blur(16px) saturate(160%);
+    background:rgba(10,16,34,.55);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    height:66px;gap:18px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-weight:800;font-size:1.05rem;letter-spacing:.2px;
+    white-space:nowrap;
+  }
+  .brand .logo{
+    width:30px;height:30px;border-radius:9px;
+    background:linear-gradient(135deg,var(--indigo),var(--indigo-2));
+    display:grid;place-items:center;font-size:16px;
+    box-shadow:0 0 18px rgba(91,108,255,.55);
+  }
+  .brand span.grad{
+    background:linear-gradient(90deg,#a9b4ff,#7ce7ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  nav.links{display:flex;align-items:center;gap:26px}
+  nav.links a{
+    color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;
+    transition:color .2s ease;
+  }
+  nav.links a:hover{color:#fff}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    text-decoration:none;font-weight:700;border-radius:11px;
+    transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+    cursor:pointer;border:none;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--indigo),var(--indigo-2));
+    color:#fff;padding:10px 18px;font-size:.9rem;
+    box-shadow:0 6px 22px rgba(91,108,255,.38);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(91,108,255,.55)}
+  .btn-ghost{
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:13px 24px;font-size:.98rem;
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
+  .btn-lg{padding:15px 32px;font-size:1.02rem;border-radius:13px}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:84px 0 64px;text-align:center;position:relative}
+  .pill{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:7px 16px;border-radius:999px;
+    background:rgba(91,108,255,.12);
+    border:1px solid rgba(120,140,255,.35);
+    color:#b9c3ff;font-size:.83rem;font-weight:600;letter-spacing:.3px;
+    margin-bottom:26px;
+  }
+  .pill .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--cyan);box-shadow:0 0 10px var(--cyan);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{
+    font-size:clamp(2.3rem,5.6vw,4rem);
+    line-height:1.1;font-weight:900;letter-spacing:-1.2px;
+    margin-bottom:22px;
+  }
+  h1 .grad{
+    background:linear-gradient(100deg,#8a9bff 0%,#a97bff 40%,#42e0ff 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p.desc{
+    max-width:660px;margin:0 auto 36px;
+    color:var(--muted);font-size:1.08rem;
+  }
+  .hero p.desc b{color:#cfd6ff;font-weight:600}
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:52px}
+
+  /* ---------- STATS ---------- */
+  .stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    max-width:880px;margin:0 auto;
+  }
+  .stat{
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--border);
+    border-radius:14px;padding:16px 12px;
+    backdrop-filter:blur(8px);
+  }
+  .stat .num{
+    display:block;font-size:1.35rem;font-weight:800;
+    background:linear-gradient(90deg,#b6c1ff,#63e6ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    margin-bottom:2px;
+  }
+  .stat .lbl{font-size:.76rem;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;font-weight:600}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:76px 0}
+  .sec-head{text-align:center;margin-bottom:46px}
+  .sec-head .kicker{
+    display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:2px;
+    text-transform:uppercase;color:var(--cyan);margin-bottom:12px;
+  }
+  .sec-head h2{
+    font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:800;letter-spacing:-.6px;
+  }
+  .sec-head p{color:var(--muted);max-width:560px;margin:12px auto 0;font-size:.98rem}
+
+  /* ---------- FEATURES ---------- */
+  .grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  }
+  .card{
+    position:relative;
+    background:linear-gradient(180deg,rgba(22,32,64,.9),rgba(13,20,42,.9));
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:28px 24px 26px;
+    overflow:hidden;
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+  }
+  .card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--indigo),var(--indigo-2),var(--cyan));
+    opacity:.9;
+  }
+  .card:hover{
+    transform:translateY(-7px);
+    border-color:rgba(120,140,255,.42);
+    box-shadow:0 18px 40px rgba(4,8,25,.6),0 0 0 1px rgba(120,140,255,.15) inset;
+  }
+  .card .icon{font-size:1.9rem;margin-bottom:14px;display:block}
+  .card h3{font-size:1.06rem;font-weight:700;margin-bottom:8px}
+  .card p{color:var(--muted);font-size:.9rem}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{
+    position:relative;max-width:720px;margin:0 auto;
+    display:flex;flex-direction:column;gap:34px;
+  }
+  .steps::before{
+    content:"";position:absolute;left:27px;top:14px;bottom:14px;width:3px;
+    border-radius:3px;
+    background:linear-gradient(180deg,var(--indigo),var(--indigo-2),var(--cyan));
+    opacity:.6;
+  }
+  .step{display:flex;gap:22px;align-items:flex-start;position:relative}
+  .step .n{
+    flex:0 0 57px;width:57px;height:57px;border-radius:50%;
+    background:linear-gradient(135deg,var(--indigo),var(--indigo-2));
+    display:grid;place-items:center;
+    font-weight:900;font-size:1.15rem;color:#fff;
+    box-shadow:0 0 0 6px rgba(10,16,34,.9),0 0 24px rgba(91,108,255,.5);
+    z-index:1;
+  }
+  .step .body h3{font-size:1.08rem;font-weight:700;margin-bottom:6px}
+  .step .body p{color:var(--muted);font-size:.92rem;max-width:520px}
+
+  /* ---------- FAQ ---------- */
+  .faq{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  details{
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:0 20px;
+    transition:background .2s ease,border-color .2s ease;
+    overflow:hidden;
+  }
+  details[open]{background:rgba(91,108,255,.08);border-color:rgba(120,140,255,.4)}
+  summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:19px 0;font-weight:600;font-size:1rem;
+    user-select:none;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary .plus{
+    flex:0 0 26px;width:26px;height:26px;position:relative;
+    border-radius:8px;background:rgba(120,140,255,.16);
+    transition:transform .25s ease,background .25s ease;
+  }
+  summary .plus::before,
+  summary .plus::after{
+    content:"";position:absolute;background:#b9c3ff;border-radius:2px;
+    top:50%;left:50%;transition:transform .25s ease,opacity .25s ease;
+  }
+  summary .plus::before{width:12px;height:2px;transform:translate(-50%,-50%)}
+  summary .plus::after{width:2px;height:12px;transform:translate(-50%,-50%)}
+  details[open] summary .plus{transform:rotate(90deg);background:rgba(66,224,255,.22)}
+  details[open] summary .plus::after{opacity:0;transform:translate(-50%,-50%) rotate(90deg)}
+  details .answer{
+    padding:0 0 20px;color:var(--muted);font-size:.93rem;max-width:640px;
+  }
+
+  /* ---------- CTA BANNER ---------- */
+  .cta-banner{
+    position:relative;overflow:hidden;
+    border-radius:24px;
+    border:1px solid rgba(120,140,255,.3);
+    background:linear-gradient(135deg,rgba(30,40,90,.85),rgba(15,22,48,.95));
+    padding:64px 32px;text-align:center;
+  }
+  .cta-banner::before{
+    content:"";position:absolute;inset:-40% -10%;
+    background:radial-gradient(circle at 50% 50%,rgba(91,108,255,.35),transparent 60%);
+    pointer-events:none;
+  }
+  .cta-banner::after{
+    content:"";position:absolute;width:420px;height:420px;border-radius:50%;
+    top:-160px;right:-120px;
+    background:radial-gradient(circle,rgba(66,224,255,.22),transparent 70%);
+    pointer-events:none;
+  }
+  .cta-banner h2{
+    position:relative;font-size:clamp(1.6rem,3.6vw,2.4rem);
+    font-weight:900;letter-spacing:-.6px;margin-bottom:14px;
+  }
+  .cta-banner p{position:relative;color:var(--muted);max-width:520px;margin:0 auto 30px;font-size:.98rem}
+  .cta-banner .btn{position:relative}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:34px 0 42px;
+    background:rgba(6,10,24,.5);
+  }
+  .foot-inner{
+    display:flex;flex-wrap:wrap;gap:16px;
+    align-items:center;justify-content:space-between;
+  }
+  .foot-inner .copy{color:var(--muted);font-size:.86rem}
+  .foot-inner a{
+    color:#b9c3ff;text-decoration:none;font-size:.88rem;font-weight:600;
+    display:inline-flex;align-items:center;gap:7px;
+    transition:color .2s ease;
+  }
+  .foot-inner a:hover{color:#fff}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .stats{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:640px){
+    nav.links{display:none}
+    .nav-inner{height:60px}
+    .hero{padding:56px 0 44px}
+    .grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr 1fr;gap:10px}
+    .cta-row{flex-direction:column;align-items:stretch}
+    .cta-row .btn{width:100%}
+    section{padding:56px 0}
+    .steps::before{left:24px}
+    .step .n{flex-basis:49px;width:49px;height:49px;font-size:1rem}
+    .cta-banner{padding:48px 22px}
+    .foot-inner{flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <span class="logo">🪓</span>
+      <span>Chop A Forest <span class="grad">Script</span></span>
+    </div>
+    <nav class="links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary" href="https://gitscore.cc" target="_blank" rel="noopener">Download</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="pill"><span class="dot"></span> Chop A Forest Script · Windows Automation</div>
+      <h1>Chop A Forest <span class="grad">Script</span><br>Farms Trees While You Do Nothing</h1>
+      <p class="desc">
+        Auto-farm trees, instant log collection, and teleport-to-wood in one lightweight script.
+        Auto-sell lumber with <b>configurable speed</b> so your inventory never fills up — built for
+        Windows 10 and 11, free and open source.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary btn-lg" href="https://gitscore.cc" target="_blank" rel="noopener">⬇ Download for Windows</a>
+        <a class="btn btn-ghost" href="https://gitscore.cc" target="_blank" rel="noopener">★ View on GitHub</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="num">48,200+</span><span class="lbl">Downloads</span></div>
+        <div class="stat"><span class="num">v3.4.1</span><span class="lbl">Latest Version</span></div>
+        <div class="stat"><span class="num">Win</span><span class="lbl">Windows 10 / 11</span></div>
+        <div class="stat"><span class="num">Free</span><span class="lbl">Open Source</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Features</span>
+        <h2>Everything You Need to Clear the Forest</h2>
+        <p>Six core modules working together to automate tree farming from the first swing to the last log sold.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <span class="icon">🌲</span>
+          <h3>Auto-Farm Trees</h3>
+          <p>Continuously detects and chops nearby trees in a loop, so your character never stands idle while a forest is still standing.</p>
+        </div>
+        <div class="card">
+          <span class="icon">📦</span>
+          <h3>Instant Log Collection</h3>
+          <p>Logs are picked up the moment they drop — no walking back and forth, no missed drops, no inventory clutter on the ground.</p>
+        </div>
+        <div class="card">
+          <span class="icon">⚡</span>
+          <h3>Teleport-to-Wood</h3>
+          <p>Instantly zip to the nearest tree or log pile instead of pathing across the map. Cut travel time to zero and keep the loop tight.</p>
+        </div>
+        <div class="card">
+          <span class="icon">💰</span>
+          <h3>Auto-Sell Lumber</h3>
+          <p>Automatically sells collected wood at the vendor so your capacity never runs out and your earnings keep stacking up.</p>
+        </div>
+        <div class="card">
+          <span class="icon">🎚️</span>
+          <h3>Configurable Speed</h3>
+          <p>Dial in chop speed, collection delay, and sell intervals to match your setup — from relaxed farming to full-speed runs.</p>
+        </div>
+        <div class="card">
+          <span class="icon">🪶</span>
+          <h3>Lightweight & Safe</h3>
+          <p>A single compact script with no background bloat. Free and open source, so you can review exactly what runs on your PC.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">How it works</span>
+        <h2>Up and Farming in Three Steps</h2>
+        <p>No complicated setup. Download, launch, and let the script handle the forest.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="n">1</div>
+          <div class="body">
+            <h3>Download and extract</h3>
+            <p>Grab the latest release from the download page, unzip it to any folder, and confirm it runs on Windows 10 or 11.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">2</div>
+          <div class="body">
+            <h3>Configure your farm loop</h3>
+            <p>Set chop speed, collection delay, teleport toggle, and auto-sell intervals in the simple config file or in-app panel.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">3</div>
+          <div class="body">
+            <h3>Launch and collect lumber</h3>
+            <p>Start the script and watch it farm trees, scoop up logs instantly, and sell lumber automatically — hands-free.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">FAQ</span>
+        <h2>Questions Before You Chop?</h2>
+        <p>The most common things players ask about Chop A Forest Script.</p>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Is Chop A Forest Script free to use?<span class="plus"></span></summary>
+          <div class="answer">Yes. Chop A Forest Script is completely free and open source. You can download it, inspect the code, and use it without paying anything or creating an account.</div>
+        </details>
+        <details>
+          <summary>Which Windows versions are supported?<span class="plus"></span></summary>
+          <div class="answer">The script runs on Windows 10 and Windows 11 (64-bit). No extra runtime or heavy dependencies are required beyond the standard setup instructions on the download page.</div>
+        </details>
+        <details>
+          <summary>Can I change the auto-farm speed?<span class="plus"></span></summary>
+          <div class="answer">Absolutely. Chop speed, log collection delay, teleport behavior, and auto-sell intervals are all configurable, so you can tune the farm loop to anything from relaxed to full speed.</div>
+        </details>
+        <details>
+          <summary>Does it work with auto-sell enabled the whole time?<span class="plus"></span></summary>
+          <div class="answer">Yes. Auto-sell lumber runs alongside auto-farm and instant log collection, continuously clearing your inventory so the loop never stalls on a full bag.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section>
+    <div class="wrap">
+      <div class="cta-banner">
+        <h2>Stop Chopping Manually. Start Farming.</h2>
+        <p>Download Chop A Forest Script for Windows and let auto-farm, instant collection, and auto-sell do the work.</p>
+        <a class="btn btn-primary btn-lg" href="https://gitscore.cc" target="_blank" rel="noopener">⬇ Download Chop A Forest Script</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span class="copy">© 2025 Chop A Forest Script. All rights reserved.</span>
+    <a href="https://gitscore.cc" target="_blank" rel="noopener">★ GitHub Repository</a>
+  </div>
+</footer>
+
+</body>
+</html>
